@@ -1,0 +1,22 @@
+{
+    "Borax": {
+        "cores_per_node": 36,
+        "mem_per_node": 128
+    },
+    "Boraxo": {
+        "cores_per_node": 36,
+        "mem_per_node": 192
+    },
+    "Dane": {
+        "cores_per_node": 112,
+        "mem_per_node": 256
+    },
+    "Ruby": {
+        "cores_per_node": 56,
+        "mem_per_node": 192
+    },
+    "Lassen": {
+        "cores_per_node": 44,
+        "mem_per_node": 256
+    }
+}
