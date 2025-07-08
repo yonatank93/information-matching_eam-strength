@@ -1,0 +1,24 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+                    "VacancyFormationEnergyRelaxationVolume_bcc_W__TE_197190379294_001"
+                ],
+                "prop": [
+                    "monovacancy-neutral-relaxed-formation-potential-energy-crystal-npt"
+                ],
+                "keys": [
+                    "relaxed-formation-potential-energy"
+                ],
+                "units": [
+                    "eV"
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+                    "ElasticConstantsCubic_bcc_Ta__TE_391736780667_006"
+                ],
+                "prop": [
+                    "elastic-constants-isothermal-cubic-crystal-npt"
+                ],
+                "keys": [
+                    "c11",
+                    "c12",
+                    "c44"
+                ],
+                "units": [
+                    "GPa",
+                    "GPa",
+                    "GPa"
+                ]
+            }
+        ]
+    }
+}

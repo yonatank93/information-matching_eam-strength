@@ -1,0 +1,24 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+                    "LinearThermalExpansionCoeff_bcc_W__TE_489123578653_002"
+                ],
+                "prop": [
+                    "linear-thermal-expansion-coefficient-cubic-crystal-npt"
+                ],
+                "keys": [
+                    "linear-thermal-expansion-coefficient"
+                ],
+                "units": [
+                    "1/K"
+                ]
+            }
+        ]
+    }
+}

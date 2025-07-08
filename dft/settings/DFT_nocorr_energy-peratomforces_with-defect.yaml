@@ -1,0 +1,34 @@
+# General settings
+general:
+  init_params: "data/original_parameters_W0.txt"  # Initial parameters
+  results_dir: "results/DFT/DFT_nocorr_energy-peratomforces_with-defect"  # Location where all results are written to
+  candidates_dir: "configs/Ta"  # Candidate configuration directory
+  suffix: ""  # Suffix of the folder for each iteration: iteration_<iter>_<suffix>
+  niters: 10  # Total number of iterations
+  nburnins: 10  # Number of burnin steps -- After the burnin period, current optima weights are combined with previous weights
+  lambda_reg: 1.0  # Lambda regularization strength -- Can also be a int, float, or 'inf'
+
+# FIM candidates settings
+fim_candidates:
+  per_atom: true  # Option to split forces FIM by atoms for each configuration
+
+# FIM target settings
+fim_target:
+  strength_deriv: null  # Strength derivative file, e.g.: "data/vasily_strength_deriv_iteration_1.json"
+  additional_props:  # Additional KIMRun target property input files
+    - "properties/bcc_W_cohesive-potential-energy-cubic-crystal.json"
+    - "properties/bcc_W_elastic-constants-isothermal-cubic-crystal-npt.json"
+    - "properties/bcc_W_surface-energy-cubic-crystal-npt.json"
+  target_cov: "data/covariance/covariance_Ta_a0-ecoh-c11-c12-c44-gammas_nocorr.npy"  # Target covariance numpy file
+
+# FIM matching settings
+fim_matching: {}  # All settings are covered by general and niters, nburnins  
+
+# Submit training jobs settings
+submit_training:
+  params_reg: "data/original_parameters_W0_7values.txt"  # Parameter file for regularization -- 7-value format
+  rel_training_dir: "training"  # Directory to store all training results, relative to target directory
+  ncalcs: "all"  # Number of training calculations for each job
+
+# Postprocess training settings
+postprocess_training: {}  # All covered elsewhere

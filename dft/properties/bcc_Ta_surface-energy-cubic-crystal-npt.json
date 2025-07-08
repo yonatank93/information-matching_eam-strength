@@ -1,0 +1,24 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+		    "SurfaceEnergyCubicCrystalBrokenBondFit_bcc_Ta__TE_865925447546_004"
+                ],
+                "prop": [
+                    "surface-energy-cubic-crystal-npt"
+                ],
+                "keys": [
+                    "surface-energy"
+                ],
+                "units": [
+                    "eV/angstrom^2"
+                ]
+            }
+        ]
+    }
+}

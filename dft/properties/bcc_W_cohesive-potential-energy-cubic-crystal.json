@@ -1,0 +1,26 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+                    "LatticeConstantCubicEnergy_bcc_W__TE_155104699590_007"
+                ],
+                "prop": [
+                    "cohesive-potential-energy-cubic-crystal"
+                ],
+                "keys": [
+                    "a",
+                    "cohesive-potential-energy"
+                ],
+                "units": [
+                    "angstrom",
+                    "eV"
+                ]
+            }
+        ]
+    }
+}

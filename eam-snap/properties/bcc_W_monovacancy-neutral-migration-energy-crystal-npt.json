@@ -1,0 +1,24 @@
+{
+    "init_args": {
+        "target_property_type": "KIMRun",
+        "target_property_args": {}
+    },
+    "calculate_property_args": {
+        "get_test_result_args": [
+            {
+                "test": [
+                    "VacancyFormationMigration_bcc_W__TE_485565507879_001"
+                ],
+                "prop": [
+                    "monovacancy-neutral-migration-energy-crystal-npt"
+                ],
+                "keys": [
+                    "vacancy-migration-energy"
+                ],
+                "units": [
+                    "eV"
+                ]
+            }
+        ]
+    }
+}
