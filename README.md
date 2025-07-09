@@ -7,7 +7,7 @@ plastic strength predictions via the information-matching method for active lear
 
 ## Specific requirements
 
-* Orchestrator (LLNL)
+* [Orchestrator (LLNL)](https://lc.llnl.gov/gitlab/iap-uq/orchestrator)
 * [information-matching](https://github.com/yonatank93/information-matching)
 * [QUESTS](https://github.com/dskoda/quests/tree/main)
 

@@ -40,6 +40,8 @@ if download_folder.exists():
 else:
     # Download
     print("Downloading additional data...")
+    link = ""
+    subprocess.run(["wget", link, "-O", str(download_folder.with_suffix(".tar.gz"))])
 
     # Untar
     print("Untar the downloaded file to the current directory.")
