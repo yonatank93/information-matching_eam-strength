@@ -23,7 +23,6 @@ there might be some changes that need to be done in the future.
 
 1. Orchestrator branch 84-fim-using-refactored-potential
 2. Yonatan's information-matching package (https://github.com/yonatank93/information-matching)
-3. ASE >= 3.23.0
 
 Note: It is much easier to install requirement 2 and its dependencies in x86 machine.
 

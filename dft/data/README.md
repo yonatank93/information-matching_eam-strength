@@ -20,4 +20,3 @@ separately due to their sizes.
   QoIs.
 * *stress_simulation* - Containing files and scripts to visualize the stress simulation
   results.
-		
