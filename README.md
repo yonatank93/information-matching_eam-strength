@@ -19,6 +19,7 @@ plastic strength predictions via the information-matching method for active lear
   ground truth. These 2 cases are combined into a single folder because they use the same
   dataset.
 * *dft* - Containing scripts and data for the case fitted to DFT ground truth.
+* *download_additional_data.py* - A utility script to download the additional data.
 
 
 
