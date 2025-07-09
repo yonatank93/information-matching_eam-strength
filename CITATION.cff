@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+authors:
+- family-names: "Kurniawan"
+  given-names: "Yonatan"
+  orcid: "https://orcid.org/0000-0002-5369-5710"
+title: "Data for development of EAM potential for plastic strength prediction for BCC Ta via information-matching method"
+version: 1.0.0
+date-released: 2025-07-08
+url: "https://github.com/yonatank93/information-matching_eam-strength"
