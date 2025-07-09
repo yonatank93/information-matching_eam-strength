@@ -29,13 +29,13 @@ parser.add_argument(
     "--parameter-center",
     type=str,
     help="Path to parameter file that will be the center of the regularization",
-    dest="parameter_center")
+    dest="parameter_center",
+)
 parser.add_argument(
     "-pr",
     "--params_regularization",
     type=str,
-    help="Path to the parameter file for the center of regularization, "
-    "7-value format",
+    help="Path to the parameter file for the center of regularization, " "7-value format",
     default=DATA_DIR / "original_parameters_W0_7values.txt",
     dest="params_reg_file",
 )
@@ -44,7 +44,8 @@ parser.add_argument(
     "--fimmatch-dir",
     type=str,
     help="Location of fim-matching results, e.g., ./results/iteration_1",
-    dest="fimmatch_dir")
+    dest="fimmatch_dir",
+)
 parser.add_argument(
     "-c",
     "--config-dir",
@@ -59,26 +60,33 @@ parser.add_argument(
     help="Path to the reference data numpy file",
     dest="reference_data_path",
 )
-parser.add_argument("-t",
-                    "--target-dir",
-                    help="Target directory to store the training results",
-                    type=str,
-                    default=None,
-                    dest="target_dir")
-parser.add_argument("-p",
-                    "--partition",
-                    type=str,
-                    help="Type of LC partition to use, e.g., Borax, Dane",
-                    dest="partition")
-parser.add_argument("-n",
-                    "--num-calcs-per-job",
-                    help="Number of calculations per job",
-                    dest="ncalcs_per_job")
+parser.add_argument(
+    "-t",
+    "--target-dir",
+    help="Target directory to store the training results",
+    type=str,
+    default=None,
+    dest="target_dir",
+)
+parser.add_argument(
+    "-p",
+    "--partition",
+    type=str,
+    help="Type of LC partition to use, e.g., Borax, Dane",
+    dest="partition",
+)
+parser.add_argument(
+    "-n",
+    "--num-calcs-per-job",
+    help="Number of calculations per job",
+    dest="ncalcs_per_job",
+)
 parser.add_argument(
     "-s",
     "--submit",
     action="store_true",
-    help="An option to submit jobs, otherwise just write training settings")
+    help="An option to submit jobs, otherwise just write training settings",
+)
 args = parser.parse_args()
 
 # Limit the number of calculations to do
@@ -97,8 +105,7 @@ GT_FILE = Path(args.reference_data_path)
 # Parameters for regularization
 PARAMS_REG_FILE = Path(args.params_reg_file)
 # Optimal configurations
-optimal_envs = np.loadtxt(FIMMATCH_DIR / "optimal_weights_without_zeros.txt",
-                          skiprows=1)
+optimal_envs = np.loadtxt(FIMMATCH_DIR / "optimal_weights_without_zeros.txt", skiprows=1)
 identifier = [int(val) for val in optimal_envs[:, 0]]
 
 # Computation source allocation
@@ -154,8 +161,7 @@ pcenter_log = np.log(np.abs(pcenter))
 nparams = len(pcenter)
 nsamples = 100
 # Transformation to convert 7-value format to 20-value format
-eam_transform = EAMTransform(str(p0), str(TARGET_DIR),
-                             str(DATA_DIR / "translate.x"))
+eam_transform = EAMTransform(str(p0), str(TARGET_DIR), str(DATA_DIR / "translate.x"))
 
 # Pick one of the following distribution to generate random initial guesses
 # # Normal distribution
@@ -194,10 +200,8 @@ for scale in tqdm(scale_list):
     for ii, val in enumerate(samples):
         # Update the job settings list
         calc_settings.update(
-            {settings_idx: {
-                "regularization": reg_name,
-                "sample_idx": ii
-            }})
+            {settings_idx: {"regularization": reg_name, "sample_idx": ii}}
+        )
 
         # Write settings to a file
         # Target directory to store the results
@@ -249,10 +253,7 @@ for idx, job in calc_settings.items():
 if NCALCS_LIMIT in [np.inf, "all", "unlimited"]:
     calcs_todo = all_calcs_todo
 else:
-    calcs_todo = {
-        idx: all_calcs_todo[idx]
-        for idx in list(all_calcs_todo)[:NCALCS_LIMIT]
-    }
+    calcs_todo = {idx: all_calcs_todo[idx] for idx in list(all_calcs_todo)[:NCALCS_LIMIT]}
 
 # Print some information
 print(len(calcs_todo), "calculations need to be done")
@@ -365,7 +366,7 @@ do
     cp -rv "$FIMMATCH_DIR"/$f $TMP_FIMMATCH_DIR
 done
 # Calculation files in $MY_WORKSPACE --- Mainly python scripts
-for f in {training_new.py,transform.py};
+for f in {training.py,transform.py};
 do
     cp -rv "$MY_WORKSPACE"/$f $TMP_DIR
 done
@@ -389,7 +390,7 @@ run_training() {
     source "$SETTINGS_DIR/$idx.sh"
     # This file contains DATADES_DIR, P0_FILE, and SCALE
     # Run
-    python training_new.py -p0 "$P0_FILE" -pr "$PARAMS_REG_FILE" -r "$TMP_GT_FILE" -f "$TMP_FIMMATCH_DIR" -c "$TMP_CONFIGS_DIR" -t "$TARGET_DIR" -s "$SCALE"
+    python training.py -p0 "$P0_FILE" -pr "$PARAMS_REG_FILE" -r "$TMP_GT_FILE" -f "$TMP_FIMMATCH_DIR" -c "$TMP_CONFIGS_DIR" -t "$TARGET_DIR" -s "$SCALE"
     # This is where the training results are stored temporarily
     TARGET_DIR="$TMP_FIMMATCH_DIR/$idx"
     # Copy the results to my storage
@@ -442,7 +443,8 @@ for ii, part in enumerate(partition):
         jobname=jobname,
         config_idx_str=config_idx_str,
         calc_idx_list=calc_idx_list,
-        configs_dir=CONF_DIR)
+        configs_dir=CONF_DIR,
+    )
     with open("training.sh", "w") as f:
         f.write(job_script)
 
@@ -456,7 +458,8 @@ for ii, part in enumerate(partition):
             f"{calc_settings_dir} {calc_id}",
             shell=True,
             capture_output=True,
-            text=True)
+            text=True,
+        )
         # Extract job ID using regular expression
         job_id_match = re.search(r"Submitted batch job (\d+)", process.stdout)
         if job_id_match:

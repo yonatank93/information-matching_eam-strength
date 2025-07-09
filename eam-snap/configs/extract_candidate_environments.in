@@ -1,0 +1,31 @@
+# LAMMPS Input Script to Compute Atomic Forces
+# log 		 log.lammps
+
+# Initialize and define units and boundary conditions
+units 	     metal
+atom_style   atomic
+boundary     p p p
+
+# Define the simulation box using known bounds from the .dump file header
+region 	     simbox prism 945.2951058648548 1737.1266170496060 &
+                          -400.6353272792469 419.56442404085044 &
+                          -310.1190542204561 494.72260784626945 &
+                          6.2188278662727674 -2.4918818131154445 3.0074771675674690 &
+                          units box
+create_box   1 simbox
+
+# Read atoms from an existing .dump file, specifying scaled coordinates (xs, ys, zs)
+read_dump    final.W0.dump 250000 x y z box yes add yes replace yes
+# read_dump    candidates/config_0.dump 250000 x y z box yes add yes replace yes
+
+# Define the interatomic potential (customize as needed)
+pair_style   eam/alloy
+pair_coeff   * * W0.eam.alloy W0
+
+# Loop over central atom coordinate, stored in a .txt file
+variable	 n loop 0 9999
+label		 loop_start
+include      lammps_helper/lammps_include_${n}.txt
+
+next         n
+jump         SELF loop_start
