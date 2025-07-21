@@ -150,3 +150,74 @@ def natural_key(s):
         int(text) if text.isdigit() else text
         for text in re.split(r'(\d+)', s)
     ]
+
+
+def extract_strength_simulation_data(filename: str, key=None):
+    """This function takes the lammps output file and extract the printed
+    thermo information, which contain the data to plot the strength simulation
+    curve.
+
+    If there are multiple thermo tables found, each table will be stored in
+    different dictionary key.
+
+    Parameters
+    ----------
+    filename: str
+        Path to the lammps out file that contains thermo table.
+    key: None or int or "all" (optional)
+        If None, then return a dictionary containing all thermo tables as
+        separate keys. If int, return the table of the corresponding key. If
+        "all", concatenate all tables and return the resulting table.
+    """
+    with open(filename, "r") as f:
+        lines = f.readlines()
+
+    capture = False
+    idata = 0  # Index for storing the captured data
+
+    data_all = {}
+    for ii, line in enumerate(lines):
+        if "Step Temp" in line:
+            # Start capturing the data when the table header is detected
+            capture = True
+            continue  # Skip to the next line directly
+        if capture:
+            # Turn off capture mode at the end of table
+            if "Loop time" in line:
+                # Line after the table is this loop time report
+                capture = False
+                # The table has all been captured, so we can skip to the next
+                # line
+                continue
+            else:
+                # Retrieve the data
+                numbers = re.findall(r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?",
+                                     line)
+                # Convert to float
+                numbers = np.array([float(num) for num in numbers])
+                # Put the extracted numbers in the line into an array
+                if idata == 0:
+                    # Create the container array in the beginning of the table
+                    data = numbers
+                else:
+                    data = np.vstack((data, numbers))  # Stack
+                idata += 1
+
+    # The file might contain multiple trajectory data. This is indicated when
+    # there are multiple tables that start with step 0
+    idx_step_zero = np.where(data[:, 0] == 0.0)[0]
+    data_all = {}
+    for ii, idx in enumerate(idx_step_zero):
+        if (ii + 1) == len(idx_step_zero):
+            # Last part of the trajectory data
+            data_all.update({ii: data[idx:]})
+        else:
+            data_all.update({ii: data[idx:idx_step_zero[ii + 1]]})
+
+    if key is None:
+        return data_all
+    elif isinstance(key, int):
+        return data_all[key]
+    elif key == "all":
+        con_data = np.vstack([val for val in data_all.values()])
+        return con_data

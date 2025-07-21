@@ -14,7 +14,8 @@ import pprint
 
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import block_until_completed, run_python_command, sync_calc
+from utils import (extract_strength_simulation_data, block_until_completed,
+                   run_python_command, sync_calc)
 
 # Command line arguments
 parser = argparse.ArgumentParser(
@@ -349,12 +350,76 @@ if args.predict:
         ])
         run_python_command(python_command)
 
+    # Prepare for propagating the perdictions uncertainties
+    # Parameter uncertaitny
+    fim_opt = np.load(TARGET_DIR / "fim_environments_optimal.npy")
+    cov_params = np.linalg.pinv(fim_opt)
+    # Prediction Jacobian
+    with open(TARGET_DIR / "FIM_target" / "jacobian_other_properties.pkl",
+              "rb") as f:
+        jac_qois = pickle.load(f)
+
     # Print the property predictions
     for ff in property_prediction_files:
-        print("Predictions for", ff.with_suffix("").name)
+        key = ff.with_suffix("").name
+        print("Predictions for", key)
+        # Mean
         prop_values = np.load(ff)
-        print("Values:", prop_values)
+        print("Mean:", prop_values)
+        # Uncertainty
+        jac = jac_qois[key]
+        cov_qois = jac @ cov_params @ jac.T
+        print("Stdev:", np.sqrt(np.diag(cov_qois)))
         print()
+
+    # Plastic strength prediction, if available
+    deform_file = TARGET_DIR / "out.deform"
+    if deform_file.exists():
+        deform_data = extract_strength_simulation_data(deform_file, "all")
+        # Stress data is on column index 5
+        strength_data = deform_data[:, 5]
+        # Mean and simulation stdev
+        strength_mean_bar = np.mean(strength_data[-1500:])
+        strength_std_bar = np.std(strength_data[-1500:])
+        # Convert unit to GPa
+        strength_mean_gpa = strength_mean_bar / 1e4
+        strength_std_gpa = strength_std_bar / 1e4
+        # Print
+        print("Predictions for plastic strength")
+        print("Simulation mean:", strength_mean_gpa)
+        print("Simulation stdev:", strength_std_gpa)
+        # Propagated uncertainty
+        jac_strength_file = TARGET_DIR / "FIM_target" / "jacobian_strength.npy"
+        if jac_strength_file.exists():
+            jac_strength = np.load(jac_strength_file)
+            cov_strength = jac_strength @ cov_params @ jac_strength.T
+            print("Propagated stdev:", np.sqrt(cov_strength[0, 0]))
+        print()
+
+    # # Print the property predictions
+    # for ff in property_prediction_files:
+    #     print("Predictions for", ff.with_suffix("").name)
+    #     prop_values = np.load(ff)
+    #     print("Values:", prop_values)
+    #     print()
+
+    # # Plastic strength prediction, if available
+    # deform_file = TARGET_DIR / "out.deform"
+    # if deform_file.exists():
+    #     deform_data = extract_strength_simulation_data(deform_file, "all")
+    # # Stress data is on column index 5
+    # strength_data = deform_data[:, 5]
+    # # Mean and simulation stdev
+    # strength_mean_bar = np.mean(strength_data[-1500:])
+    # strength_std_bar = np.std(strength_data[-1500:])
+    # # Convert unit to GPa
+    # strength_mean_gpa = strength_mean_bar / 1e4
+    # strength_std_gpa = strength_std_bar / 1e4
+    # # Print
+    # print("Predictions for plastic strength")
+    # print("Simulation mean:", strength_mean_gpa)
+    # print("Simulation stdev:", strength_std_gpa)
+    # print()
 
 ###############################################################################
 # (OPTIONAL) PLOT RESULTS
