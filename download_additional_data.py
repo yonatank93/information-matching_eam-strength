@@ -2,11 +2,9 @@
 and copy them into their respective directories.
 """
 
-
 from pathlib import Path
 import argparse
 import subprocess
-
 
 # Command line arguments
 parser = argparse.ArgumentParser(description="Download additional data")
@@ -25,7 +23,6 @@ parser.add_argument(
     "--eam-snap", action="store_true", help="Apply actions to EAM-SNAP data"
 )
 args = parser.parse_args()
-
 
 # Directories
 FILE_DIR = Path(__file__).parent
@@ -46,7 +43,6 @@ else:
     # Untar
     print("Untar the downloaded file to the current directory.")
     subprocess.run(["tar", "-xzvf", download_folder.with_suffix(".tar.gz")], cwd=FILE_DIR)
-
 
 # Copy the data to the respective directories, if requested
 if args.copy_data:
@@ -74,16 +70,18 @@ if args.copy_results:
     if args.dft:
         print("Copying DFT results...")
         for ff in folders_to_copy:
-            src = download_folder / "dft" / ff / "*"
-            dest = DFT_DIR / ff
+            src = download_folder / "dft" / ff
+            dest = DFT_DIR / "DFT"
+            dest.mkdir(parents=True, exist_ok=True)
             if src.exists():
                 print(f"Copying {src} to {dest}")
                 subprocess.run(["cp", "-urv", str(src), str(dest)])
     if args.eam_snap:
         print("Copying EAM-SNAP results...")
         for ff in folders_to_copy:
-            src = download_folder / "eam-snap" / ff / "*"
-            dest = EAM_SNAP_DIR / ff
+            src = download_folder / "eam-snap" / ff
+            dest = EAM_SNAP_DIR / "scaled_Ta"
+            dest.mkdir(parents=True, exist_ok=True)
             if src.exists():
                 print(f"Copying {src} to {dest}")
                 subprocess.run(["cp", "-urv", str(src), str(dest)])
