@@ -29,18 +29,22 @@ from glob import glob
 import pickle
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from orchestrator.computer.score.fim import FIMMatchingScore
 
 FILE_DIR = Path(__file__).resolve().parent
 
 # Command line arguments
 parser = argparse.ArgumentParser("Final FIM-matching analysis")
-parser.add_argument("-s",
-                    "--settings-file",
-                    type=str,
-                    required=True,
-                    help="Settings file",
-                    dest="settings_file")
+parser.add_argument(
+    "-s",
+    "--settings-file",
+    type=str,
+    required=True,
+    help="Settings file",
+    dest="settings_file",
+)
 args = parser.parse_args()
 
 # Read calculation settings from a yaml file
@@ -58,8 +62,10 @@ fim_target_settings = settings["fim_target"]
 # Strength derivative file
 STRENGTH_DERIV = fim_target_settings["strength_deriv"]
 if STRENGTH_DERIV is not None:
-    print("FIM-matching targets strength directly. "
-          "The analysis here excludes this target property")
+    print(
+        "FIM-matching targets strength directly. "
+        "The analysis here excludes this target property"
+    )
 # Additional KIMRun properties input files
 ADDITIONAL_PROPS = fim_target_settings["additional_props"]
 # Target covariance of the target properties
@@ -116,16 +122,28 @@ try:
             # "verbose": True,
             "epsilonStar": tol,
             "lambdaStar": 1e4,
-            "numThreads": 4
+            "numThreads": 4,
         },
-        weight_tolerance={
-            "zero_tol": np.sqrt(tol),
-            "zero_tol_dual": np.sqrt(tol)
-        })
+        weight_tolerance={"zero_tol": np.sqrt(tol), "zero_tol_dual": np.sqrt(tol)},
+    )
 except AttributeError:
     print("FIM-matching between intermediate QoIs and strength failed.")
     print("The problem is infeasible")
     print()
+
+###############################################################################
+# Compare the information from the data and the target strength
+
+print("Check if the data actually contain all necessary information.")
+
+# Load the FIM of the optimal data
+fim_data = np.load(LAST_RESULTS_DIR / "fim_environments_optimal.npy")
+# Check the eigenvalues - If the data contain all necessary information, then
+# the eigenvalue of the difference matrix should all be non-negative.
+l = np.linalg.eigvalsh(fim_data - fim_target)
+print("Data contains all necessary information for strength prediction:")
+print(np.all(l > -1e-15))
+print()
 
 ###############################################################################
 # Eigenspaces overlap
@@ -135,7 +153,8 @@ print("Overlap between the eigenspaces")
 # Retrieve the eigenvectors - Only compare the eigenvectors corresponding to
 # non-zero eigenvalues
 # Intermediate QoIs
-fim_cand_comb = np.sum(fim_candidates, axis=0)
+# fim_cand_comb = np.sum(fim_candidates, axis=0)
+fim_cand_comb = np.load(LAST_RESULTS_DIR / "FIM_target" / "fim_target.npy")
 lcand, vcand = np.linalg.eigh(fim_cand_comb)
 idx = np.where(lcand > 1e-8)[0]
 lcand = lcand[idx]
@@ -150,6 +169,29 @@ vtar = vtar[:, -1].reshape((-1, 1))
 # eigenvector and the intermediate QoIs eigenvectors. Then, we square the
 # values and sum them. The number gives a ratio of the information that the
 # intermediate QoIs can capture.
-info_ratio = np.sum((vtar.T @ vcand)**2)
-print(f"Intermediate QoIs are able to capture {(info_ratio*100):0.2f}% "
-      "of the required information")
+info_ratio = np.sum((vtar.T @ vcand) ** 2)
+print(
+    f"Intermediate QoIs are able to capture {(info_ratio*100):0.2f}% "
+    "of the required information"
+)
+print()
+
+###############################################################################
+# Plot the difference of the FIMs
+
+print("Plot of the difference between intermediate QoIs FIM and strength FIM.")
+
+fim_diff = fim_cand_comb - fim_target
+l_diff, v_diff = np.linalg.eigh(fim_diff)
+nparams = len(l_diff)
+
+# Plot the eigenvectors
+plt.figure()
+plt.imshow(v_diff[:, ::-1], vmin=-1, vmax=1, cmap="bwr")
+plt.colorbar()
+# List the eigenvalues as xticks
+param_labels = [r"$r_e$", r"$\beta$", r"$A$", r"$B$", r"$\kappa$", r"$\eta$", r"$F_e$"]
+plt.xticks(range(nparams), [f"{l:0.2e}" for l in l_diff[::-1]], rotation=90)
+plt.yticks(range(nparams), param_labels)
+plt.tight_layout()
+plt.show()
