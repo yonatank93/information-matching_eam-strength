@@ -119,15 +119,13 @@ if svd_file.exists():
     s = SVD["S"]
     vh = SVD["V"].T
     end_time = time.perf_counter()
-    print("SVD completed in",
-          datetime.timedelta(seconds=end_time - start_time))
+    print("SVD completed in", datetime.timedelta(seconds=end_time - start_time))
 else:
     start_time = time.perf_counter()
     u, s, vh = np.linalg.svd(cand_desc_norm)
     np.savez(svd_file, U=u, S=s, V=vh.T)
     end_time = time.perf_counter()
-    print("SVD completed in",
-          datetime.timedelta(seconds=end_time - start_time))
+    print("SVD completed in", datetime.timedelta(seconds=end_time - start_time))
 
 # Project the descriptors into the embedding space
 for val in cand_desc_dict.values():
@@ -145,10 +143,14 @@ for key, val in cand_desc_dict.items():
         # For the forces, we want to exclude symmetric environments
         forces = val["atoms"].arrays[FORCES_KEY]
         idx_include = np.where(np.linalg.norm(forces, axis=1) > 0.0)[0]
-        pca_cand_forces = np.vstack(
-            (pca_cand_forces, val["desc_pca"][idx_include]))
+        idx_exclude = [ii for ii in np.arange(len(forces)) if ii not in idx_include]
+        pca_cand_forces = np.vstack((pca_cand_forces, val["desc_pca"][idx_include]))
+        # But even if the configuration contains asymmetric environments, some of them
+        # might still be symmetric
+        pca_cand_energy = np.vstack((pca_cand_energy, val["desc_pca"][idx_exclude]))
     elif key in energy_keys:
         pca_cand_energy = np.vstack((pca_cand_energy, val["desc_pca"]))
+
 
 # PCA plot
 for ii in args.iterations:
@@ -158,34 +160,34 @@ for ii in args.iterations:
     plt.figure(dpi=300)
     # Plot all environments
     plt.scatter(*(pca_cand_energy[:, :npc].T), c="k", s=5, lw=0, alpha=0.5)
-    plt.scatter(*(pca_cand_forces[:, :npc].T),
-                c="orange",
-                s=5,
-                lw=0,
-                alpha=0.5)
+    plt.scatter(
+        *(pca_cand_forces[:, :npc].T), c="orange", zorder=-5, s=5, lw=0, alpha=0.5
+    )
     # # Legends candidates
-    # all_cands = mpl.lines.Line2D([], [],
-    #                              color="black",
-    #                              marker="o",
-    #                              markersize=10,
-    #                              linestyle="None",
-    #                              label="All environments")
-    # forces_cands = mpl.lines.Line2D([], [],
-    #                                 color="orange",
-    #                                 marker="o",
-    #                                 markersize=10,
-    #                                 linestyle="None",
-    #                                 label="Non-symmetric\nenvironmennts")
+    # all_cands = mpl.lines.Line2D(
+    #     [],
+    #     [],
+    #     color="black",
+    #     marker="o",
+    #     markersize=10,
+    #     linestyle="None",
+    #     label="Centrosymmetric\nenvironments",
+    # )
+    # forces_cands = mpl.lines.Line2D(
+    #     [],
+    #     [],
+    #     color="orange",
+    #     marker="o",
+    #     markersize=10,
+    #     linestyle="None",
+    #     label="Non-centrosymmetric\nenvironmennts",
+    # )
 
     # Load the optimal weights
-    fimmatch_res_file = Path(
-        iter_dirs[ii - 1]) / "optimal_weights_without_zeros.csv"
+    fimmatch_res_file = Path(iter_dirs[ii - 1]) / "optimal_weights_without_zeros.csv"
     if not fimmatch_res_file.exists():
         continue
-    fimmatch_res = np.loadtxt(fimmatch_res_file,
-                              skiprows=1,
-                              delimiter=",",
-                              dtype=object)
+    fimmatch_res = np.loadtxt(fimmatch_res_file, skiprows=1, delimiter=",", dtype=object)
     opt_identifier = fimmatch_res[:, 1].astype(str)
     opt_weights = fimmatch_res[:, 2].astype(float)
     # Sort the weights from large to small --- Configs with small weights are
@@ -219,8 +221,7 @@ for ii in args.iterations:
                 key = "_".join(key.split("_")[:-1])
                 key = key[:-1]
                 # Add the descriptor - only for one atom
-                pca_opt = np.vstack(
-                    (pca_opt, cand_desc_dict[key]["desc_pca"][atom_idx]))
+                pca_opt = np.vstack((pca_opt, cand_desc_dict[key]["desc_pca"][atom_idx]))
                 # Add weights - only for one atom
                 plot_weights = np.append(plot_weights, wm)
                 # print("forces per-atom", key)
@@ -231,19 +232,20 @@ for ii in args.iterations:
                 # Add the weights - need to duplicate by the number of atoms
                 atoms = cand_desc_dict[key]["atoms"]
                 natoms = atoms.get_global_number_of_atoms()
-                plot_weights = np.append(plot_weights,
-                                         np.ones(natoms) * wm * natoms**2)
+                plot_weights = np.append(plot_weights, np.ones(natoms) * wm * natoms**2)
                 # print("forces per-configuration", key)
 
     # Plot the optimal environments
-    plt.scatter(*(pca_opt[:, :npc].T),
-                c="r",
-                marker="o",
-                alpha=1,
-                lw=0.25,
-                ec="w",
-                s=250 * np.sqrt(plot_weights / max(plot_weights)),
-                label="Optimal environments")
+    plt.scatter(
+        *(pca_opt[:, :npc].T),
+        c="r",
+        marker="o",
+        alpha=1,
+        lw=0.25,
+        ec="w",
+        s=250 * np.sqrt(plot_weights / max(plot_weights)),
+        label="Optimal environments",
+    )
 
     # Labels, ticks, etc
     plt.xticks([])
@@ -252,6 +254,7 @@ for ii in args.iterations:
     plt.ylabel("PC2", fontsize=16)
     # plt.legend(handles=[all_cands, forces_cands], fontsize=16)
     plt.legend(fontsize=16)
-    plt.savefig(Path(iter_dirs[ii - 1]) / "optimal_environments_pca.png",
-                bbox_inches="tight")
+    plt.savefig(
+        Path(iter_dirs[ii - 1]) / "optimal_environments_pca.png", bbox_inches="tight"
+    )
 plt.show()
