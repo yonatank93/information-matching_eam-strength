@@ -67,9 +67,8 @@ for ii in tqdm(range(nfiles)):
     desc_all = atoms.arrays["desc"]
     # But, we only want to take the descriptor of the central atom, pointed
     # by the masking array
-    mask_forces = np.loadtxt(config_dir / f"config_{ii}_mask.txt").reshape(
-        (-1, 3))
-    idx = np.product(mask_forces, axis=1).astype(int)
+    mask_forces = np.loadtxt(config_dir / f"config_{ii}_mask.txt").reshape((-1, 3))
+    idx = np.prod(mask_forces, axis=1).astype(int)
     cand_desc[ii] = desc_all[np.where(idx)[0]]
 
 ################################################################################
@@ -93,9 +92,9 @@ pca_cand = (vh @ cand_desc_norm.T).T
 for ii in args.iterations:
     print("Load the optimal weights for iteration", ii)
     # Load the optimal weights
-    fimmatch_res = np.loadtxt(Path(iter_dirs[ii - 1]) /
-                              "optimal_weights_without_zeros.txt",
-                              skiprows=1)
+    fimmatch_res = np.loadtxt(
+        Path(iter_dirs[ii - 1]) / "optimal_weights_without_zeros.txt", skiprows=1
+    )
     opt_identifier = fimmatch_res[:, 0].astype(int)
     opt_weights = fimmatch_res[:, 1]
     # Sort the weights from large to small --- Configs with small weights are
@@ -113,34 +112,43 @@ for ii in args.iterations:
     pca_opt = (vh @ opt_desc.T).T
 
     npc = 2
-    plt.figure()
-    plt.scatter(*(pca_cand[:, :npc].T), c="k", s=5, lw=0, alpha=0.5)
-    plt.scatter(*(pca_opt[:, :npc].T),
-                c="r",
-                marker="o",
-                alpha=1,
-                lw=0.5,
-                ec="w",
-                s=500 * np.sqrt(opt_weights / max(opt_weights)))
+    plt.figure(dpi=300)
+    plt.scatter(*(pca_cand[:, :npc].T), c="k", s=15, lw=0.25, edgecolors="w")
+    plt.scatter(
+        *(pca_opt[:, :npc].T),
+        c="r",
+        marker="o",
+        alpha=1,
+        lw=0.5,
+        ec="w",
+        s=500 * np.sqrt(opt_weights / max(opt_weights)),
+    )
     plt.xticks([])
     plt.yticks([])
     plt.xlabel("PC1", fontsize=16)
     plt.ylabel("PC2", fontsize=16)
 
     # # Legends handles
-    leg_cand = mpl.lines.Line2D([], [],
-                                color="black",
-                                marker="o",
-                                markersize=10,
-                                linestyle="None",
-                                label="Candidate environments")
-    leg_opt = mpl.lines.Line2D([], [],
-                               color="red",
-                               marker="o",
-                               markersize=10,
-                               linestyle="None",
-                               label="Optimal environmennts")
+    leg_cand = mpl.lines.Line2D(
+        [],
+        [],
+        color="black",
+        marker="o",
+        markersize=10,
+        linestyle="None",
+        label="Candidate environments",
+    )
+    leg_opt = mpl.lines.Line2D(
+        [],
+        [],
+        color="red",
+        marker="o",
+        markersize=10,
+        linestyle="None",
+        label="Optimal environmennts",
+    )
     plt.legend(handles=[leg_cand, leg_opt], fontsize=14)
-    plt.savefig(Path(iter_dirs[ii - 1]) / "optimal_environments_pca.png",
-                bbox_inches="tight")
+    plt.savefig(
+        Path(iter_dirs[ii - 1]) / "optimal_environments_pca.png", bbox_inches="tight"
+    )
 plt.show()

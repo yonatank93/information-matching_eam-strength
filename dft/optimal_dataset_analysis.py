@@ -159,16 +159,29 @@ for ii in args.iterations:
     npc = 2
     plt.figure(dpi=300)
     # Plot all environments
-    plt.scatter(*(pca_cand_energy[:, :npc].T), c="k", s=5, lw=0, alpha=0.5)
     plt.scatter(
-        *(pca_cand_forces[:, :npc].T), c="orange", zorder=-5, s=5, lw=0, alpha=0.5
+        *(pca_cand_energy[:, :npc].T),
+        c="k",
+        marker="^",
+        s=30,
+        lw=0.5,
+        edgecolors="w",
+    )
+    plt.scatter(
+        *(pca_cand_forces[:, :npc].T),
+        c="orange",
+        zorder=-5,
+        marker="s",
+        s=30,
+        lw=0.5,
+        edgecolors="w",
     )
     # # Legends candidates
     # all_cands = mpl.lines.Line2D(
     #     [],
     #     [],
     #     color="black",
-    #     marker="o",
+    #     marker="^",
     #     markersize=10,
     #     linestyle="None",
     #     label="Centrosymmetric\nenvironments",
@@ -177,7 +190,7 @@ for ii in args.iterations:
     #     [],
     #     [],
     #     color="orange",
-    #     marker="o",
+    #     marker="s",
     #     markersize=10,
     #     linestyle="None",
     #     label="Non-centrosymmetric\nenvironmennts",
@@ -241,7 +254,7 @@ for ii in args.iterations:
         c="r",
         marker="o",
         alpha=1,
-        lw=0.25,
+        lw=0.5,
         ec="w",
         s=250 * np.sqrt(plot_weights / max(plot_weights)),
         label="Optimal environments",
